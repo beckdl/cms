@@ -1,9 +1,9 @@
 <div class="panel panel-default">
     <div class="panel-heading">
-        <h3>{{ selectedContact?.name }}</h3>
+        <h3>{{ contact?.name }}</h3>
         
         <div class="row">
-            <img src="{{ selectedContact?.imageUrl }}" class="img-responsive" />
+            <img src="{{ contact?.imageUrl }}" class="img-responsive" />
             <div class="pull-right" role="group">
                 <a href="#" class="btn btn-primary">Edit</a>
                 <a href="#" class="btn btn-danger">Delete</a>
@@ -11,7 +11,7 @@
         </div>
     </div>
     <div class="panel-body">
-        <p><strong>Email:</strong> {{ selectedContact?.email }}</p>
-        <p><strong>Phone:</strong> {{ selectedContact?.phone }}</p>
+        <p><strong>Email:</strong> {{ contact?.email }}</p>
+        <p><strong>Phone:</strong> {{ contact?.phone }}</p>
     </div>
 </div>
