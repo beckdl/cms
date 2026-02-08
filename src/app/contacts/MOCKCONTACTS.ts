@@ -120,6 +120,16 @@ export const MOCKCONTACTS: Contact[] = [
     group: null
   },
 
+  // additional individual contact
+  {
+    id: '19',
+    name: 'Daniel Beck',
+    email: 'beckd@byui.edu',
+    phone: '208-496-3799',
+    imageUrl: '../../assets/images/danielbeck.jpg',
+    group: null
+  },
+
   // teams
   // index 13
   {
