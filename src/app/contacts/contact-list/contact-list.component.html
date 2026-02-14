@@ -1,7 +1,7 @@
 <div class="panel panel-default">
     <div class="panel-heading">
         <h3>Contacts
-        <a class="btn btn-success btn-md pull-right">
+        <a [routerLink]="['new']" class="btn btn-success btn-md pull-right">
             New Contact
         </a>
         </h3>
@@ -11,7 +11,7 @@
             <app-contact-item 
                 *ngFor="let contactEl of contacts" 
                 [contact]="contactEl"
-                (selectedContactEvent)="selectedContact(contactEl)">
+                >
             </app-contact-item>
         </div>
     </div>
