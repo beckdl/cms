@@ -11,6 +11,8 @@ export class DocumentService implements OnInit {
   documentListChangedEvent = new Subject<Document[]>();
   maxDocumentId: number;
 
+  server = "http://localhost:3000/documents";
+
   documentSelectedEvent = new EventEmitter<Document>();  
   documents: Document[] = [];
 
@@ -23,7 +25,7 @@ export class DocumentService implements OnInit {
   }
 
   getDocuments(): Document[] {
-    this.http.get<Document[]>("https://cms-wdd430-524df-default-rtdb.firebaseio.com/documents.json").subscribe(
+    this.http.get<Document[]>(this.server).subscribe(
       (documents: Document[]) => {
         this.documents = documents;
         this.maxDocumentId = this.getMaxId();
@@ -57,16 +59,22 @@ export class DocumentService implements OnInit {
     return maxId;
   }
 
-  addDocument(newDocument: Document) {
-    if (!newDocument) {
+  addDocument(document: Document) {
+    if (!document) {
       return;
     }
 
-    this.maxDocumentId++;
-    newDocument.id = this.maxDocumentId.toString();
-    this.documents.push(newDocument)
-    const documentsListClone = this.documents.slice();
-    this.storeDocuments();
+    document.id = '';
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+    this.http.post<{ message: string, document: Document }>(this.server, document, { headers: headers })
+      .subscribe(
+        (responseData) => {
+          this.documents.push(responseData.document);
+          this.documentListChangedEvent.next(this.documents.slice());
+        }
+      );
   }
 
   updateDocument(originalDocument: Document, newDocument: Document) {
@@ -74,15 +82,23 @@ export class DocumentService implements OnInit {
       return;
     }
 
-    const pos = this.documents.indexOf(originalDocument);
+    const pos = this.documents.findIndex(d => d.id === originalDocument.id);
     if (pos < 0) {
       return;
     }
 
     newDocument.id = originalDocument.id;
-    this.documents[pos] = newDocument;
-    const documentsListClone = this.documents.slice();
-    this.storeDocuments();
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+    this.http.put(`${this.server}/${originalDocument.id}`, newDocument, { headers: headers })
+      .subscribe(
+        (response: Response) => {
+          this.documents[pos] = newDocument;
+          this.documentListChangedEvent.next(this.documents.slice());
+        }
+      );
   }
 
   deleteDocument(document: Document) {
@@ -94,23 +110,14 @@ export class DocumentService implements OnInit {
     if (pos < 0) {
       return;
     }
-    this.documents.splice(pos, 1);
-    const documentsListClone = this.documents.slice();
-    this.storeDocuments();
-  }
 
-  storeDocuments() {
-    const documents = JSON.stringify(this.documents);
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json'
-    });
-    this.http.put("https://cms-wdd430-524df-default-rtdb.firebaseio.com/documents.json", documents, { headers }).subscribe(
-      () => {
+    this.http.delete(`${this.server}/${document.id}`).subscribe(
+      (response: Response) => {
+        this.documents.splice(pos, 1);
         this.documentListChangedEvent.next(this.documents.slice());
-      },
-      (error: any) => {
-        console.error('Error storing documents:', error);
       }
     );
   }
+
+  
 }

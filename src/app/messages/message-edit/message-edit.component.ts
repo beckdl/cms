@@ -16,7 +16,7 @@ export class MessageEditComponent {
   constructor(private messageService: MessageService) { }
   // Use a contact ID (must match an ID from MOCKCONTACTS)
   // set to Daniel Beck's ID
-  currentSender = '19';
+  currentSender = '101';
 
   onSendMessage() {
     const subject = this.subject.nativeElement.value;

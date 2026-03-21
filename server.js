@@ -5,7 +5,7 @@ var http = require('http');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var index = require('./server/routes/app');
+var mongoose = require('mongoose');
 const messageRoutes = require('./server/routes/messages');
 const contactRoutes = require('./server/routes/contacts');
 const documentsRoutes = require('./server/routes/documents');
@@ -16,6 +16,18 @@ var index = require('./server/routes/app');
 // ... ADD CODE TO IMPORT YOUR ROUTING FILES HERE ... 
 
 var app = express(); // create an instance of express
+
+const connectToDatabase = async () => {
+  await mongoose.connect('mongodb://localhost:27017/cms').then(res => {
+      console.log('Connected to database!');
+      }
+    ).catch(err => {
+      console.log('Connection failed!');
+      console.log(err);
+      });
+};
+
+connectToDatabase();
 
 // Tell express to use the following parsers for POST data
 app.use(bodyParser.json());

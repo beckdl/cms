@@ -3,6 +3,13 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Launch Program",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server.js",
+      "preLaunchTask": "npm: start-server"
+    },
+    {
       "name": "ng serve",
       "type": "chrome",
       "request": "launch",

@@ -10,6 +10,7 @@ export class MessageService {
   messageChangedEvent = new EventEmitter<Message[]>();
   messages: Message[] = [];
   maxMessageId: number;
+  server = "http://localhost:3000/messages";
 
   constructor(private http: HttpClient) {
     this.messages = MOCKMESSAGES;
@@ -17,9 +18,9 @@ export class MessageService {
   }
 
   getMessages(): Message[] {
-    this.http.get<Message[]>("https://cms-wdd430-524df-default-rtdb.firebaseio.com/messages.json").subscribe(
-      (messages: Message[]) => {
-        this.messages = messages;
+    this.http.get<any[]>(this.server).subscribe(
+      (messages: any[]) => {
+        this.messages = messages.map((message) => this.normalizeMessage(message));
         this.maxMessageId = this.getMaxId();
         this.messageChangedEvent.next(this.messages.slice());
         this.messages.slice();
@@ -36,8 +37,37 @@ export class MessageService {
   }
 
   addMessage(message: Message) {
-    this.messages.push(message);
-    this.storeMessages();
+    if (!message) {
+      return;
+    }
+    message.id = "";
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+    this.http.post<{ message: string, newMessage: Message}>(this.server, message, { headers: headers })
+      .subscribe((response) => {
+        const newMessage = this.normalizeMessage(response.newMessage);
+        this.messages.push(newMessage);
+        this.messageChangedEvent.emit(this.messages.slice());
+      }, (error) => {
+        console.error('Error adding message:', error);
+      });
+  }
+
+  private normalizeMessage(message: any): Message {
+    const normalizedId = message?.id ?? message?._id ?? '';
+    const rawSender = message?.sender;
+    const normalizedSender = typeof rawSender === 'object'
+      ? (rawSender?.id ?? rawSender?._id ?? '')
+      : (rawSender ?? '');
+
+    return new Message(
+      String(normalizedId),
+      message?.subject ?? '',
+      message?.msgText ?? '',
+      String(normalizedSender)
+    );
   }
 
   getMaxId(): number {
@@ -56,7 +86,7 @@ export class MessageService {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json'
     });
-    this.http.put('https://cms-wdd430-524df-default-rtdb.firebaseio.com/messages.json', messages, { headers: headers })
+    this.http.put(`${this.server}.json`, messages, { headers: headers })
       .subscribe(() => {
         this.messageChangedEvent.emit(this.messages.slice());
       }, (error) => {
